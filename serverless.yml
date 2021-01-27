@@ -1,0 +1,89 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: tree
+
+plugins:
+  - serverless-python-requirements
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - .vscode/**
+    - .idea/**
+    - test-data/**
+    - _pytest/**
+    - .pytest_cache/**
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+  stages:
+    - dev
+  bucket:
+    dev: trees  
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: eu-central-1
+  stage: ${opt:stage,'dev'}
+  profile: treenity
+  role: resTreesLambdaRole
+  timeout: 10
+  memorySize: 64  
+  stackTags:
+    STACK: ${self:service}  
+
+functions:
+  upload-image:
+    handler: handler.upload_image
+                
+resources:
+  Resources:  
+    resTreesLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        ManagedPolicyArns:
+          # Allow lambda to write to CloudWatch
+          - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        Policies:
+          - PolicyName: allowS3
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "s3:GetObject"
+                    - "s3:GetObjectTagging"
+                    - "s3:PutObjectTagging"
+                    - "s3:PutObject"
+                    - "s3:ListBucket"
+                    - "s3:ListBuckets"
+                    - "s3:ListObjects"
+                    - "s3:ListObjectsV2"
+                    - "s3:DeleteObject"
+                  Resource:
+                    - arn:aws:s3:::${self:custom.bucket.${self:provider.stage}}
+                    - arn:aws:s3:::${self:custom.bucket.${self:provider.stage}}/*
