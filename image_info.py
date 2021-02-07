@@ -23,7 +23,6 @@ def get_gps_info(path):
 
         print(result)
         return result
-
     except Exception as e:
         #logger.error(f'Failed to read location from image [{path}]', e)
         raise
