@@ -42,13 +42,19 @@ provider:
   profile: treenity
   role: resTreesLambdaRole
   timeout: 10
-  memorySize: 64  
+  memorySize: 128  
   stackTags:
     STACK: ${self:service}  
 
 functions:
-  upload-image:
-    handler: handler.upload_image
+  upload-img-s3_handler:
+    handler: handler.upload_img_s3_handler
+  upload-image-service:
+    handler: handler.upload_image_service
+  list-areas-service:
+    handler: handler.list_areas_service
+  list-area-trees-service:
+    handler: handler.list_area_trees_service      
                 
 resources:
   Resources:  
